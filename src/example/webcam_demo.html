@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompreFace Webcam Demo</title>
+    <script type="text/javascript">
+        function startVideo() {
+            const videoElement = document.getElementById("live");
+            const canvasElement = document.getElementById("canvas");
+            const canvasDisplay = document.getElementById("canvasDisplay");
+            const apiKey = "8ae55877-1be4-4be4-8d86-3f72340023dc";
+
+            const ctxInput = canvasElement.getContext('2d');
+            const ctxOutput = canvasDisplay.getContext('2d');
+
+            // Zugriff auf die Webcam
+            navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
+                .then(stream => {
+                    videoElement.srcObject = stream;
+                    processFrame();
+                })
+                .catch(error => console.error("Error accessing webcam:", error));
+
+            function processFrame() {
+                // Zeichne das aktuelle Videobild auf das versteckte Canvas
+                ctxInput.drawImage(videoElement, 0, 0, 640, 480);
+
+                // Konvertiere das Canvas in ein Blob-Objekt
+                canvasElement.toBlob(blob => {
+                    const formData = new FormData();
+                    formData.append('file', blob, "frame.jpg");
+
+                    // Sende das Bild an den CompreFace-Server
+                    fetch('http://localhost:8000/api/v1/recognition/recognize', {
+                        method: "POST",
+                        headers: { "x-api-key": apiKey },
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => updateDisplay(data))
+                        .catch(error => console.error("Recognition API error:", error))
+                        .finally(() => requestAnimationFrame(processFrame)); // Wiederhole für den nächsten Frame
+                }, 'image/jpeg', 0.95);
+            }
+
+            function updateDisplay(data) {
+                // Kopiere das aktuelle Videobild auf das sichtbare Canvas
+                ctxOutput.clearRect(0, 0, 640, 480);
+                ctxOutput.drawImage(videoElement, 0, 0, 640, 480);
+
+                // Zeichne erkannte Gesichter und Namen, falls vorhanden
+                if (data.result && data.result.length > 0) {
+                    data.result.forEach(face => {
+                        const { x_min, y_min, x_max, y_max } = face.box;
+                        const name = face.subjects[0]?.subject || "Sigma";
+
+                        ctxOutput.lineWidth = 3;
+                        ctxOutput.strokeStyle = 'green';
+                        ctxOutput.strokeRect(x_min, y_min, x_max - x_min, y_max - y_min);
+
+                        ctxOutput.font = '18px Arial';
+                        ctxOutput.fillStyle = 'red';
+                        ctxOutput.fillText(name, x_min, y_min - 10);
+                    });
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+<h1>CompreFace Webcam Demo</h1>
+<button onclick="startVideo()">Start Webcam</button>
+
+<!-- Verstecktes Video- und Input-Canvas -->
+<video id="live" width="640" height="480" autoplay style="display:none;"></video>
+<canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+<!-- Sichtbares Output-Canvas -->
+<canvas id="canvasDisplay" width="640" height="480"></canvas>
+</body>
+</html>
