@@ -51,13 +51,21 @@ export function updateDetailsList() {
     detailsList.innerHTML = ""; // Clear the list
     const intervals = getTimeIntervals();
     intervals.forEach((interval, index) => {
-        const duration = Math.round((interval.end - interval.start) / 1000);
+        const durationInSeconds = Math.round((interval.end - interval.start) / 1000); // Duration in seconds
+        const hours = Math.floor(durationInSeconds / 3600);
+        const minutes = Math.floor((durationInSeconds % 3600) / 60);
+        const seconds = durationInSeconds % 60;
+
+        // Format duration
+        const durationFormatted = `${hours > 0 ? `${hours}h ` : ''}${minutes > 0 ? `${minutes}m ` : ''}${seconds}s`;
+
         const listItem = document.createElement("li");
         listItem.className = "list-group-item";
-        listItem.textContent = `Interval ${index + 1}: ${interval.start.toLocaleTimeString()} - ${interval.end.toLocaleTimeString()}, Duration: - ${duration}s`;
+        listItem.textContent = `Interval ${index + 1}: ${interval.start.toLocaleTimeString()} - ${interval.end.toLocaleTimeString()}, Duration: ${durationFormatted}`;
         detailsList.appendChild(listItem);
     });
 }
+
 
 // Toggle webcam
 toggleCameraBtn.addEventListener("click", () => {
