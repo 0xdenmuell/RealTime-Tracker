@@ -1,18 +1,16 @@
-import {handleClickOffCameraEvent, handleClickOnCameraEvent} from "./camera";
+import { handleClickOffCameraEvent, handleClickOnCameraEvent } from "./camera";
+import { startTracking, stopTracking, getTimeIntervals, exportTimeIntervalsAsCSV } from "./timeTracker";
 import Logo from './logo.png';
-
 
 const detailsList = document.getElementById("detailsList");
 const workedTimeDisplay = document.getElementById("workedTime");
 const statusElement = document.getElementById("statusMessage");
-
 
 const toggleCameraBtn = document.getElementById("toggleCamera");
 const exportDetailsBtn = document.getElementById("exportDetails");
 
 let isCameraOn = false;
 let isTimerOn = false;
-
 
 let workedTime = 0;
 let timerInterval;
@@ -23,77 +21,79 @@ const logoImage = new Image();
 logoImage.src = Logo;
 element.appendChild(logoImage);
 
-// Timer to calculate worked time
+// Timer logic
 export function startTimer() {
-    if (isTimerOn) return
-    timerInterval = setInterval(() => {
-        updateTimer()
-    }, 1000);
+    if (isTimerOn) return;
+
+    startTracking();
+    timerInterval = setInterval(() => updateTimer(), 1000);
     isTimerOn = true;
 }
 
 export function updateTimer() {
     workedTime++;
-    const hours = String(Math.floor(workedTime / 3600)).padStart(2, '0');
-    const minutes = String(Math.floor((workedTime % 3600) / 60)).padStart(2, '0');
-    const seconds = String(workedTime % 60).padStart(2, '0');
+    const hours = String(Math.floor(workedTime / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((workedTime % 3600) / 60)).padStart(2, "0");
+    const seconds = String(workedTime % 60).padStart(2, "0");
     workedTimeDisplay.textContent = `Worked Time: ${hours}:${minutes}:${seconds}`;
 }
 
 export function stopTimer() {
-    if (!isTimerOn) return
+    if (!isTimerOn) return;
+
+    stopTracking();
     clearInterval(timerInterval);
     isTimerOn = false;
 }
 
-// Toggle Webcam
+// Update the details list
+export function updateDetailsList() {
+    detailsList.innerHTML = ""; // Clear the list
+    const intervals = getTimeIntervals();
+    intervals.forEach((interval, index) => {
+        const duration = Math.round((interval.end - interval.start) / 1000);
+        const listItem = document.createElement("li");
+        listItem.className = "list-group-item";
+        listItem.textContent = `Interval ${index + 1}: ${interval.start.toLocaleTimeString()} - ${interval.end.toLocaleTimeString()}, Duration: - ${duration}s`;
+        detailsList.appendChild(listItem);
+    });
+}
+
+// Toggle webcam
 toggleCameraBtn.addEventListener("click", () => {
     if (!isCameraOn) {
-        clickOnCameraEvent()
-    } else if (isCameraOn) {
-        clickOffCameraEvent()
+        handleClickOnCameraEvent()
+            .then(() => {
+                isCameraOn = true;
+                toggleCameraBtn.textContent = "Turn Off Camera";
+                startTimer();
+                showStatusMessage("Recognition successful");
+            })
+            .catch(err => {
+                showStatusMessage(err.message, "warning");
+            });
+    } else {
+        handleClickOffCameraEvent()
+            .then(() => {
+                isCameraOn = false;
+                toggleCameraBtn.textContent = "Turn On Camera";
+                stopTimer();
+                updateDetailsList();
+            })
+            .catch(err => {
+                showStatusMessage(err.message, "warning");
+            });
     }
 });
 
-export function clickOnCameraEvent() {
-    handleClickOnCameraEvent().then(() => {
-            isCameraOn = true
-            isTimerOn = true
-            toggleCameraBtn.textContent = "Turn Off Camera";
-            startTimer()
+// Export details button
+exportDetailsBtn.addEventListener("click", () => {
+    exportTimeIntervalsAsCSV();
+});
 
-        }
-    ).catch(
-        (err) => {
-            showStatusMessage(err, 'warning')
-            isCameraOn = true
-            isTimerOn = false
-            toggleCameraBtn.textContent = "Turn On Camera";
-            stopTimer()
-        }
-    )
-}
-
-export function clickOffCameraEvent() {
-    handleClickOffCameraEvent().then(() => {
-            isCameraOn = false
-            isTimerOn = false
-            toggleCameraBtn.textContent = "Turn On Camera";
-        }
-    ).catch(
-        (err) => {
-            showStatusMessage(err, 'warning')
-            isCameraOn = true
-            isTimerOn = true
-            toggleCameraBtn.textContent = "Turn Off Camera";
-        }
-    );
-}
-
-// Example: Show a status message dynamically
-function showStatusMessage(message, type = "info") {
+// Show a status message
+export function showStatusMessage(message, type = "info") {
     console.log(message);
-
     statusElement.textContent = message;
     statusElement.className = `alert alert-${type}`; // Bootstrap alert type
     statusElement.style.display = "block";
@@ -101,30 +101,3 @@ function showStatusMessage(message, type = "info") {
         statusElement.style.display = "none";
     }, 5000); // Hide after 5 seconds
 }
-
-/*
-// Add Interval Details
-export function addDetail() {
-    const now = new Date();
-    const detail = document.createElement("li");
-    detail.classList.add("list-group-item");
-    detail.textContent = `Date: ${now.toLocaleDateString()}, Time: ${now.toLocaleTimeString()}, Worked: ${workedTimeDisplay.textContent}`;
-    detailsList.appendChild(detail);
-}
-
-// Export Details
-exportDetailsBtn.addEventListener("click", () => {
-    let details = "Date,Time,Worked Time\n";
-    Array.from(detailsList.children).forEach(item => {
-        details += item.textContent.replace(/, /g, ",") + "\n";
-    });
-    const blob = new Blob([details], {type: "text/csv"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "work_details.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-});
-*/
