@@ -36,7 +36,7 @@ export async function handleClickOnCameraEvent() {
         // Start user recognition
         await handleUserRecognition(canvasDisplay);
     } catch (err) {
-        console.error("Camera error:", err.message);
+        throw new Error("Camera error:" + err.message);
     }
 }
 
@@ -59,6 +59,6 @@ export async function handleClickOffCameraEvent() {
             cancelAnimationFrame(animationFrameId);
         }
     } catch (err) {
-        console.error("Error disabling the camera:", err.message);
+        throw new Error("Error disabling the camera:" + err.message);
     }
 }

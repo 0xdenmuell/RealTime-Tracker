@@ -14,15 +14,18 @@ const config = {
         path: path.resolve(__dirname, 'dist'),
     },
     devServer: {
+        host: '0.0.0.0',  // Dies stellt sicher, dass die App von außen zugänglich ist
+        port: 3000,
+        hot: true,
         open: true,
-        host: 'localhost',
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: 'src/index.html',
+            template: './src/index.html',
         }),
 
-        new FaviconsWebpackPlugin('src/content/logo.ico'),
+        //todo fix favicon with docker
+       //new FaviconsWebpackPlugin('./src/favicon.ico'),
     ],
     module: {
         rules: [
