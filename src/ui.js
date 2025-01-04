@@ -1,7 +1,14 @@
-import { handleClickOffCameraEvent, handleClickOnCameraEvent } from "./camera";
-import { startTracking, stopTracking, getTimeIntervals, exportTimeIntervalsAsCSV } from "./timeTracker";
-import Logo from './logo.png';
+// Import necessary event handlers from camera.js
+import {disableCamera, enableCamera} from "./camera";
 
+// Import time tracking functions from timeTracker.js
+import {startTracking, stopTracking, getTimeIntervals, exportTimeIntervalsAsCSV} from "./timeTracker";
+
+// Import the logo image file
+import Logo from './logo.png';
+import {handleUserRecognition} from "./faceRecognition";
+
+// Select DOM elements for UI interaction
 const detailsList = document.getElementById("detailsList");
 const workedTimeDisplay = document.getElementById("workedTime");
 const statusElement = document.getElementById("statusMessage");
@@ -9,19 +16,25 @@ const statusElement = document.getElementById("statusMessage");
 const toggleCameraBtn = document.getElementById("toggleCamera");
 const exportDetailsBtn = document.getElementById("exportDetails");
 
+// State variables to track camera and timer status
 let isCameraOn = false;
 let isTimerOn = false;
 
-let workedTime = 0;
-let timerInterval;
+let workedTime = 0; // Timer counter in seconds
+let timerInterval; // Reference to the timer interval
+let recognitionInterval;
 
-//Webpack Logo import
+
+// Webpack-specific handling to display a logo in the UI
 const element = document.createElement('div');
 const logoImage = new Image();
 logoImage.src = Logo;
 element.appendChild(logoImage);
 
-// Timer logic
+/**
+ * Starts the work timer and begins time tracking if it is not already running.
+ * Uses `setInterval` to update the time every second.
+ */
 export function startTimer() {
     if (isTimerOn) return;
 
@@ -30,6 +43,10 @@ export function startTimer() {
     isTimerOn = true;
 }
 
+/**
+ * Updates the display showing the worked time in HH:MM:SS format.
+ * This function is called every second when the timer is active.
+ */
 export function updateTimer() {
     workedTime++;
     const hours = String(Math.floor(workedTime / 3600)).padStart(2, "0");
@@ -38,6 +55,10 @@ export function updateTimer() {
     workedTimeDisplay.textContent = `Worked Time: ${hours}:${minutes}:${seconds}`;
 }
 
+/**
+ * Stops the timer and stops time tracking.
+ * Clears the interval set by `startTimer` to halt time updates.
+ */
 export function stopTimer() {
     if (!isTimerOn) return;
 
@@ -46,7 +67,10 @@ export function stopTimer() {
     isTimerOn = false;
 }
 
-// Update the details list
+/**
+ * Updates the details list in the UI with all recorded time intervals.
+ * Each interval includes the start and end time, and the total duration formatted in hours, minutes, and seconds.
+ */
 export function updateDetailsList() {
     detailsList.innerHTML = ""; // Clear the list
     const intervals = getTimeIntervals();
@@ -67,45 +91,81 @@ export function updateDetailsList() {
 }
 
 
-// Toggle webcam
 toggleCameraBtn.addEventListener("click", () => {
     if (!isCameraOn) {
-        handleClickOnCameraEvent()
+        enableCamera()
             .then(() => {
                 isCameraOn = true;
                 toggleCameraBtn.textContent = "Turn Off Camera";
-                startTimer();
-                showStatusMessage("Recognition successful");
+
+                showStatusMessage("Camera started. Recognition ongoing...");
+                startRecognitionLoop();
             })
             .catch(err => {
-                showStatusMessage(err.message, "warning");
+                showStatusMessage(err.message, "danger");
             });
     } else {
-        handleClickOffCameraEvent()
+        disableCamera()
             .then(() => {
                 isCameraOn = false;
                 toggleCameraBtn.textContent = "Turn On Camera";
+
                 stopTimer();
-                updateDetailsList();
+                showStatusMessage("Camera stopped.");
             })
             .catch(err => {
-                showStatusMessage(err.message, "warning");
+                showStatusMessage(err.message, "danger");
             });
     }
 });
 
-// Export details button
+
+function startRecognitionLoop() {
+
+    async function recognitionCycle() {
+        if (!isCameraOn) return
+        try {
+            await handleUserRecognition().then(() => {
+                if (!isTimerOn)
+                    showStatusMessage("Face detected! Timer started.", "success");  // Using a 'success' alert type
+
+                startTimer();
+                recognitionInterval = 5000
+            })
+        } catch (err) {
+            stopTimer();
+            if (isCameraOn) showStatusMessage(err.message, "warning");
+            updateDetailsList();
+            recognitionInterval = 2000
+        } finally {
+            setTimeout(recognitionCycle, recognitionInterval);
+
+        }
+    }
+    recognitionCycle(); // Start the first cycle immediately
+}
+
+
+/**
+ * Triggers the export of time interval data as a CSV file when the export button is clicked.
+ */
 exportDetailsBtn.addEventListener("click", () => {
     exportTimeIntervalsAsCSV();
 });
 
-// Show a status message
+let statusMessageTimeout;
+
 export function showStatusMessage(message, type = "info") {
+    // Verhindert, dass mehrere Nachrichten gleichzeitig angezeigt werden
+    clearTimeout(statusMessageTimeout);
+
     console.log(message);
     statusElement.textContent = message;
     statusElement.className = `alert alert-${type}`; // Bootstrap alert type
     statusElement.style.display = "block";
-    setTimeout(() => {
+
+    // Setzt den Timeout zurück
+    statusMessageTimeout = setTimeout(() => {
         statusElement.style.display = "none";
-    }, 5000); // Hide after 5 seconds
+    }, 10000); // Nachricht nach 10 Sekunden ausblenden
 }

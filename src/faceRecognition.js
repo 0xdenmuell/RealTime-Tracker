@@ -1,42 +1,34 @@
-import {startTimer, stopTimer} from "./ui";
+const canvasDisplay = document.getElementById("canvasDisplay");
 
-let responseInterval;
-
-export async function handleUserRecognition(canvasDisplay) {
-
-    // Konvertiere das Canvas in ein Blob-Objekt
-    canvasDisplay.toBlob(blob => {
+export async function handleUserRecognition() {
+    try {
+        const blob = await new Promise(resolve => {
+            canvasDisplay.toBlob(resolve, 'image/jpeg', 0.95);
+        });
 
         const formData = new FormData();
         formData.append('file', blob, "frame.jpg");
-        // Sende das Bild an den CompreFace-Server
-        fetch('http://localhost:8000/api/v1/recognition/recognize', {
+
+        const response = await fetchRecognitionResult(formData);
+        if (!response.ok) {
+            const body = await response.json();
+            throw new Error(body.message);
+        }
+
+    } catch (error) {
+        throw new Error(error);
+    }
+}
+
+async function fetchRecognitionResult(formData) {
+    try {
+        const response = await fetch('http://localhost:8000/api/v1/recognition/recognize', {
             method: "POST",
-            headers: {"x-api-key": "8ae55877-1be4-4be4-8d86-3f72340023dc"},
+            headers: { "x-api-key": "8ae55877-1be4-4be4-8d86-3f72340023dc" },
             body: formData
-        })
-            .then((response) => {
-                if (response.status !== 200)
-                    throw new Error(`Error: ${response.status} ${response.statusText}`);
-
-                console.log("Recognition success")
-
-                startTimer()
-
-                clearInterval(responseInterval);
-                responseInterval = setInterval(function () {
-                    handleUserRecognition(canvasDisplay)
-                }, 5000);
-            })
-            .catch(error => {
-                stopTimer();
-
-                clearInterval(responseInterval);
-                responseInterval = setInterval(function () {
-                    handleUserRecognition(canvasDisplay)
-                }, 2000);
-
-                console.log("Recognition failed:", error)
-            })
-    }, 'image/jpeg', 0.95);
+        });
+        return response;
+    } catch (error) {
+        throw new Error("Network error: " + error.message);
+    }
 }

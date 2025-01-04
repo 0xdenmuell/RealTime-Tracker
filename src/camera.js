@@ -1,10 +1,8 @@
-import {handleUserRecognition} from "./faceRecognition";
-
 const video = document.getElementById("live");
 const canvasDisplay = document.getElementById("canvasDisplay");
 let animationFrameId;
 
-export async function handleClickOnCameraEvent() {
+export async function enableCamera() {
     try {
         // Request access to the camera
         video.srcObject = await navigator.mediaDevices.getUserMedia({video: true});
@@ -32,15 +30,12 @@ export async function handleClickOnCameraEvent() {
 
         // Start rendering the video frames
         drawCameraFrame();
-
-        // Start user recognition
-        await handleUserRecognition(canvasDisplay);
     } catch (err) {
         throw new Error("Camera error:" + err.message);
     }
 }
 
-export async function handleClickOffCameraEvent() {
+export async function disableCamera() {
     try {
         // Stop the camera stream
         const stream = video.srcObject;
