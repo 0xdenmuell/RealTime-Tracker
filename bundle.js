@@ -58676,217 +58676,6 @@ function exportTimeIntervalsAsCSV() {
 
 /***/ }),
 
-/***/ "./src/ui.js":
-/*!*******************!*\
-  !*** ./src/ui.js ***!
-  \*******************/
-/***/ ((module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   showStatusMessage: () => (/* binding */ showStatusMessage),
-/* harmony export */   startRecognition: () => (/* binding */ startRecognition),
-/* harmony export */   startTimer: () => (/* binding */ startTimer),
-/* harmony export */   stopTimer: () => (/* binding */ stopTimer),
-/* harmony export */   updateDetailsList: () => (/* binding */ updateDetailsList),
-/* harmony export */   updateTimer: () => (/* binding */ updateTimer)
-/* harmony export */ });
-/* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./camera */ "./src/camera.js");
-/* harmony import */ var _timeTracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./timeTracker */ "./src/timeTracker.js");
-/* harmony import */ var _public_assets_logo_png__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../public/assets/logo.png */ "./public/assets/logo.png");
-/* harmony import */ var _faceRecognition__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./faceRecognition */ "./src/faceRecognition.js");
-// Import necessary event handlers from camera.js
-
-
-// Import time tracking functions from timeTracker.js
-
-
-// Import the logo image file
-
-
-
-
-// Select DOM elements for UI interaction
-const detailsList = document.getElementById("detailsList");
-const workedTimeDisplay = document.getElementById("workedTime");
-const statusElement = document.getElementById("statusMessage");
-
-const toggleCameraBtn = document.getElementById("toggleCamera");
-const exportDetailsBtn = document.getElementById("exportDetails");
-
-// State variables to track camera and timer status
-let isCameraOn = false;
-let isTimerOn = false;
-
-let workedTime = 0; // Timer counter in seconds
-let timerInterval; // Reference to the timer interval
-
-// Webpack-specific handling to display a logo in the UI
-const element = document.createElement('div');
-const logoImage = new Image();
-logoImage.src = _public_assets_logo_png__WEBPACK_IMPORTED_MODULE_2__;
-element.appendChild(logoImage);
-
-
-/**
- * Starts the work timer and begins time tracking if it is not already running.
- * Uses `setInterval` to update the time every second.
- */
-function startTimer() {
-    if (isTimerOn) return;
-
-    (0,_timeTracker__WEBPACK_IMPORTED_MODULE_1__.startTracking)();
-    timerInterval = setInterval(() => updateTimer(), 1000);
-    isTimerOn = true;
-}
-
-/**
- * Updates the display showing the worked time in HH:MM:SS format.
- * This function is called every second when the timer is active.
- */
-function updateTimer() {
-    workedTime++;
-    const hours = String(Math.floor(workedTime / 3600)).padStart(2, "0");
-    const minutes = String(Math.floor((workedTime % 3600) / 60)).padStart(2, "0");
-    const seconds = String(workedTime % 60).padStart(2, "0");
-    workedTimeDisplay.textContent = `Worked Time: ${hours}:${minutes}:${seconds}`;
-}
-
-/**
- * Stops the timer and stops time tracking.
- * Clears the interval set by `startTimer` to halt time updates.
- */
-function stopTimer() {
-    if (!isTimerOn) return;
-
-    (0,_timeTracker__WEBPACK_IMPORTED_MODULE_1__.stopTracking)();
-    clearInterval(timerInterval);
-    isTimerOn = false;
-}
-
-/**
- * Updates the details list in the UI with all recorded time intervals.
- * Each interval includes the start and end time, and the total duration formatted in hours, minutes, and seconds.
- */
-function updateDetailsList() {
-    detailsList.innerHTML = ""; // Clear the list
-    const intervals = (0,_timeTracker__WEBPACK_IMPORTED_MODULE_1__.getTimeIntervals)();
-    intervals.forEach((interval, index) => {
-        const durationInSeconds = Math.round((interval.end - interval.start) / 1000); // Duration in seconds
-        const hours = Math.floor(durationInSeconds / 3600);
-        const minutes = Math.floor((durationInSeconds % 3600) / 60);
-        const seconds = durationInSeconds % 60;
-
-        // Format duration
-        const durationFormatted = `${hours > 0 ? `${hours}h ` : ''}${minutes > 0 ? `${minutes}m ` : ''}${seconds}s`;
-
-        const listItem = document.createElement("li");
-        listItem.className = "list-group-item";
-        listItem.textContent = `Interval ${index + 1}: ${interval.start.toLocaleTimeString()} - ${interval.end.toLocaleTimeString()}, Duration: ${durationFormatted}`;
-        detailsList.appendChild(listItem);
-    });
-}
-
-toggleCameraBtn.addEventListener("click", () => {
-    if (!isCameraOn) {
-        (0,_camera__WEBPACK_IMPORTED_MODULE_0__.enableCamera)()
-            .then(async () => {
-                isCameraOn = true;
-                toggleCameraBtn.textContent = "Turn Off Camera";
-
-                showStatusMessage("Camera started. Recognition ongoing...");
-                startRecognition();
-            })
-            .catch(err => {
-                showStatusMessage(err.message, "danger");
-            });
-    } else {
-        (0,_camera__WEBPACK_IMPORTED_MODULE_0__.disableCamera)()
-            .then(() => {
-                isCameraOn = false;
-                toggleCameraBtn.textContent = "Turn On Camera";
-
-                stopTimer();
-                showStatusMessage("Camera stopped.");
-                stopRecognition();
-            })
-            .catch(err => {
-                showStatusMessage(err.message, "danger");
-            });
-    }
-});
-
-let recognitionInterval;
-
-async function startRecognition() {
-    async function startRecognitionLoop() {
-        if (!isCameraOn) return
-
-        if (await (0,_faceRecognition__WEBPACK_IMPORTED_MODULE_3__.isFaceDetected)()) {
-            if (!isTimerOn)
-                showStatusMessage("Face detected! Timer started.", "success");  // Using a 'success' alert type
-
-            startTimer();
-            recognitionInterval = 5000
-        } else {
-            stopTimer();
-            if (isCameraOn) showStatusMessage("No face detected. Timer stopped.", "warning");
-
-            updateDetailsList();
-            recognitionInterval = 2000
-        }
-        setTimeout(startRecognitionLoop, recognitionInterval);
-    }
-
-    startRecognitionLoop(); // Start the first cycle immediately
-}
-
-function stopRecognition() {
-    clearTimeout(recognitionInterval);
-}
-
-
-/**
- * Triggers the export of time interval data as a CSV file when the export button is clicked.
- */
-exportDetailsBtn.addEventListener("click", () => {
-    (0,_timeTracker__WEBPACK_IMPORTED_MODULE_1__.exportTimeIntervalsAsCSV)();
-});
-
-let statusMessageTimeout;
-
-function showStatusMessage(message, type = "info") {
-    // Verhindert, dass mehrere Nachrichten gleichzeitig angezeigt werden
-    clearTimeout(statusMessageTimeout);
-
-    console.log(message);
-    statusElement.textContent = message;
-    statusElement.className = `alert alert-${type} text-center mx-2 my-3`; // Bootstrap alert type
-    statusElement.style.display = "block";
-
-    // Setzt den Timeout zurück
-    statusMessageTimeout = setTimeout(() => {
-        statusElement.style.display = "none";
-    }, 10000); // Nachricht nach 10 Sekunden ausblenden
-}
-
-
-showStatusMessage("Loading App..")
-toggleCameraBtn.disabled = true;
-toggleCameraBtn.classList.add('loading');
-toggleCameraBtn.textContent = "Loading...";
-await (0,_faceRecognition__WEBPACK_IMPORTED_MODULE_3__.initRecognition)()
-toggleCameraBtn.disabled = false;
-toggleCameraBtn.classList.remove('loading')
-toggleCameraBtn.textContent = "Turn on Camera";
-showStatusMessage("App ready!")
-__webpack_async_result__();
-} catch(e) { __webpack_async_result__(e); } }, 1);
-
-/***/ }),
-
 /***/ "./public/assets/logo.png":
 /*!********************************!*\
   !*** ./public/assets/logo.png ***!
@@ -59154,75 +58943,6 @@ module.exports = /*#__PURE__*/JSON.parse('{"2.16.840.1.101.3.4.1.1":"aes-128-ecb
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/async module */
-/******/ 	(() => {
-/******/ 		var webpackQueues = typeof Symbol === "function" ? Symbol("webpack queues") : "__webpack_queues__";
-/******/ 		var webpackExports = typeof Symbol === "function" ? Symbol("webpack exports") : "__webpack_exports__";
-/******/ 		var webpackError = typeof Symbol === "function" ? Symbol("webpack error") : "__webpack_error__";
-/******/ 		var resolveQueue = (queue) => {
-/******/ 			if(queue && queue.d < 1) {
-/******/ 				queue.d = 1;
-/******/ 				queue.forEach((fn) => (fn.r--));
-/******/ 				queue.forEach((fn) => (fn.r-- ? fn.r++ : fn()));
-/******/ 			}
-/******/ 		}
-/******/ 		var wrapDeps = (deps) => (deps.map((dep) => {
-/******/ 			if(dep !== null && typeof dep === "object") {
-/******/ 				if(dep[webpackQueues]) return dep;
-/******/ 				if(dep.then) {
-/******/ 					var queue = [];
-/******/ 					queue.d = 0;
-/******/ 					dep.then((r) => {
-/******/ 						obj[webpackExports] = r;
-/******/ 						resolveQueue(queue);
-/******/ 					}, (e) => {
-/******/ 						obj[webpackError] = e;
-/******/ 						resolveQueue(queue);
-/******/ 					});
-/******/ 					var obj = {};
-/******/ 					obj[webpackQueues] = (fn) => (fn(queue));
-/******/ 					return obj;
-/******/ 				}
-/******/ 			}
-/******/ 			var ret = {};
-/******/ 			ret[webpackQueues] = x => {};
-/******/ 			ret[webpackExports] = dep;
-/******/ 			return ret;
-/******/ 		}));
-/******/ 		__webpack_require__.a = (module, body, hasAwait) => {
-/******/ 			var queue;
-/******/ 			hasAwait && ((queue = []).d = -1);
-/******/ 			var depQueues = new Set();
-/******/ 			var exports = module.exports;
-/******/ 			var currentDeps;
-/******/ 			var outerResolve;
-/******/ 			var reject;
-/******/ 			var promise = new Promise((resolve, rej) => {
-/******/ 				reject = rej;
-/******/ 				outerResolve = resolve;
-/******/ 			});
-/******/ 			promise[webpackExports] = exports;
-/******/ 			promise[webpackQueues] = (fn) => (queue && fn(queue), depQueues.forEach(fn), promise["catch"](x => {}));
-/******/ 			module.exports = promise;
-/******/ 			body((deps) => {
-/******/ 				currentDeps = wrapDeps(deps);
-/******/ 				var fn;
-/******/ 				var getResult = () => (currentDeps.map((d) => {
-/******/ 					if(d[webpackError]) throw d[webpackError];
-/******/ 					return d[webpackExports];
-/******/ 				}))
-/******/ 				var promise = new Promise((resolve) => {
-/******/ 					fn = () => (resolve(getResult));
-/******/ 					fn.r = 0;
-/******/ 					var fnQueue = (q) => (q !== queue && !depQueues.has(q) && (depQueues.add(q), q && !q.d && (fn.r++, q.push(fn))));
-/******/ 					currentDeps.map((dep) => (dep[webpackQueues](fnQueue)));
-/******/ 				});
-/******/ 				return fn.r ? promise : getResult();
-/******/ 			}, (err) => ((err ? reject(promise[webpackError] = err) : outerResolve(exports)), resolveQueue(queue)));
-/******/ 			queue && queue.d < 0 && (queue.d = 0);
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
@@ -59296,12 +59016,219 @@ module.exports = /*#__PURE__*/JSON.parse('{"2.16.840.1.101.3.4.1.1":"aes-128-ecb
 /******/ 	})();
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module used 'module' so it can't be inlined
-/******/ 	var __webpack_exports__ = __webpack_require__("./src/ui.js");
-/******/ 	
+var __webpack_exports__ = {};
+// This entry needs to be wrapped in an IIFE because it needs to be in strict mode.
+(() => {
+"use strict";
+/*!*******************!*\
+  !*** ./src/ui.js ***!
+  \*******************/
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   showStatusMessage: () => (/* binding */ showStatusMessage),
+/* harmony export */   startRecognition: () => (/* binding */ startRecognition),
+/* harmony export */   startTimer: () => (/* binding */ startTimer),
+/* harmony export */   stopTimer: () => (/* binding */ stopTimer),
+/* harmony export */   updateDetailsList: () => (/* binding */ updateDetailsList),
+/* harmony export */   updateTimer: () => (/* binding */ updateTimer)
+/* harmony export */ });
+/* harmony import */ var _camera__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./camera */ "./src/camera.js");
+/* harmony import */ var _timeTracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./timeTracker */ "./src/timeTracker.js");
+/* harmony import */ var _public_assets_logo_png__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../public/assets/logo.png */ "./public/assets/logo.png");
+/* harmony import */ var _faceRecognition__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./faceRecognition */ "./src/faceRecognition.js");
+// Import necessary event handlers from camera.js
+
+
+// Import time tracking functions from timeTracker.js
+
+
+// Import the logo image file
+
+
+
+
+// Select DOM elements for UI interaction
+const detailsList = document.getElementById("detailsList");
+const workedTimeDisplay = document.getElementById("workedTime");
+const statusElement = document.getElementById("statusMessage");
+
+const toggleCameraBtn = document.getElementById("toggleCamera");
+const exportDetailsBtn = document.getElementById("exportDetails");
+
+// State variables to track camera and timer status
+let isCameraOn = false;
+let isTimerOn = false;
+
+let workedTime = 0; // Timer counter in seconds
+let timerInterval; // Reference to the timer interval
+
+// Webpack-specific handling to display a logo in the UI
+const element = document.createElement('div');
+const logoImage = new Image();
+logoImage.src = _public_assets_logo_png__WEBPACK_IMPORTED_MODULE_2__;
+element.appendChild(logoImage);
+
+document.addEventListener('DOMContentLoaded', async () => {
+    showStatusMessage("Loading App..");
+
+    toggleCameraBtn.disabled = true;
+    toggleCameraBtn.textContent = "Loading...";
+
+    await (0,_faceRecognition__WEBPACK_IMPORTED_MODULE_3__.initRecognition)();
+
+    // Enable button and remove spinner after loading is done
+    toggleCameraBtn.disabled = false;
+    toggleCameraBtn.textContent = "Turn On Camera";
+
+    showStatusMessage("App ready!");
+})
+
+/**
+ * Starts the work timer and begins time tracking if it is not already running.
+ * Uses `setInterval` to update the time every second.
+ */
+function startTimer() {
+    if (isTimerOn) return;
+
+    (0,_timeTracker__WEBPACK_IMPORTED_MODULE_1__.startTracking)();
+    timerInterval = setInterval(() => updateTimer(), 1000);
+    isTimerOn = true;
+}
+
+/**
+ * Updates the display showing the worked time in HH:MM:SS format.
+ * This function is called every second when the timer is active.
+ */
+function updateTimer() {
+    workedTime++;
+    const hours = String(Math.floor(workedTime / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((workedTime % 3600) / 60)).padStart(2, "0");
+    const seconds = String(workedTime % 60).padStart(2, "0");
+    workedTimeDisplay.textContent = `Worked Time: ${hours}:${minutes}:${seconds}`;
+}
+
+/**
+ * Stops the timer and stops time tracking.
+ * Clears the interval set by `startTimer` to halt time updates.
+ */
+function stopTimer() {
+    if (!isTimerOn) return;
+
+    (0,_timeTracker__WEBPACK_IMPORTED_MODULE_1__.stopTracking)();
+    clearInterval(timerInterval);
+    isTimerOn = false;
+}
+
+/**
+ * Updates the details list in the UI with all recorded time intervals.
+ * Each interval includes the start and end time, and the total duration formatted in hours, minutes, and seconds.
+ */
+function updateDetailsList() {
+    detailsList.innerHTML = ""; // Clear the list
+    const intervals = (0,_timeTracker__WEBPACK_IMPORTED_MODULE_1__.getTimeIntervals)();
+    intervals.forEach((interval, index) => {
+        const durationInSeconds = Math.round((interval.end - interval.start) / 1000); // Duration in seconds
+        const hours = Math.floor(durationInSeconds / 3600);
+        const minutes = Math.floor((durationInSeconds % 3600) / 60);
+        const seconds = durationInSeconds % 60;
+
+        // Format duration
+        const durationFormatted = `${hours > 0 ? `${hours}h ` : ''}${minutes > 0 ? `${minutes}m ` : ''}${seconds}s`;
+
+        const listItem = document.createElement("li");
+        listItem.className = "list-group-item";
+        listItem.textContent = `Interval ${index + 1}: ${interval.start.toLocaleTimeString()} - ${interval.end.toLocaleTimeString()}, Duration: ${durationFormatted}`;
+        detailsList.appendChild(listItem);
+    });
+}
+
+toggleCameraBtn.addEventListener("click", (event) => {
+    if (!isCameraOn) {
+        (0,_camera__WEBPACK_IMPORTED_MODULE_0__.enableCamera)()
+            .then(() => {
+                isCameraOn = true;
+                toggleCameraBtn.textContent = "Turn Off Camera";
+
+                showStatusMessage("Camera started. Recognition ongoing...");
+                startRecognition();
+            })
+            .catch(err => {
+                showStatusMessage(err.message, "danger");
+            });
+    } else {
+        (0,_camera__WEBPACK_IMPORTED_MODULE_0__.disableCamera)()
+            .then(() => {
+                isCameraOn = false;
+                toggleCameraBtn.textContent = "Turn On Camera";
+
+                showStatusMessage("Camera stopped.");
+                stopRecognition();
+            })
+            .catch(err => {
+                    showStatusMessage(err.message, "danger");
+                }
+            );
+    }
+    event.stopImmediatePropagation()
+})
+
+
+let recognitionInterval;
+
+async function startRecognition() {
+    async function startRecognitionLoop() {
+        if (!isCameraOn) return
+
+        if (await (0,_faceRecognition__WEBPACK_IMPORTED_MODULE_3__.isFaceDetected)()) {
+            if (!isTimerOn)
+                showStatusMessage("Face detected! Timer started.", "success");  // Using a 'success' alert type
+
+            startTimer();
+            recognitionInterval = 5000
+        } else {
+            stopTimer();
+            if (isCameraOn) showStatusMessage("No face detected. Timer stopped.", "warning");
+
+            updateDetailsList();
+            recognitionInterval = 2000
+        }
+        setTimeout(startRecognitionLoop, recognitionInterval);
+    }
+
+    await startRecognitionLoop(); // Start the first cycle immediately
+}
+
+function stopRecognition() {
+    stopTimer();
+    clearTimeout(recognitionInterval)
+}
+
+
+/**
+ * Triggers the export of time interval data as a CSV file when the export button is clicked.
+ */
+exportDetailsBtn.addEventListener("click", () => {
+    (0,_timeTracker__WEBPACK_IMPORTED_MODULE_1__.exportTimeIntervalsAsCSV)();
+});
+
+let statusMessageTimeout;
+
+function showStatusMessage(message, type = "info") {
+    // Verhindert, dass mehrere Nachrichten gleichzeitig angezeigt werden
+    clearTimeout(statusMessageTimeout);
+
+    console.log(message);
+    statusElement.textContent = message;
+    statusElement.className = `alert alert-${type} text-center mx-2 my-3`; // Bootstrap alert type
+    statusElement.style.display = "block";
+
+    // Setzt den Timeout zurück
+    statusMessageTimeout = setTimeout(() => {
+        statusElement.style.display = "none";
+    }, 10000); // Nachricht nach 10 Sekunden ausblenden
+}
+})();
+
 /******/ })()
 ;
 //# sourceMappingURL=bundle.js.map
