@@ -32,6 +32,7 @@ const config = {
         rules: [
             {
                 test: /\.json$/,
+                use: 'json-loader',
                 type: 'javascript/auto',
             },
             {
@@ -47,6 +48,7 @@ const config = {
         fallback: {
             crypto: require.resolve("crypto-browserify"),
             vm: require.resolve("vm-browserify"),
+            stream: require.resolve("stream-browserify"),
             fs: false,
         }
     },
