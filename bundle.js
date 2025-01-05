@@ -58863,7 +58863,7 @@ function showStatusMessage(message, type = "info") {
 
     console.log(message);
     statusElement.textContent = message;
-    statusElement.className = `alert alert-${type} text-center`; // Bootstrap alert type
+    statusElement.className = `alert alert-${type} text-center mx-2 my-3`; // Bootstrap alert type
     statusElement.style.display = "block";
 
     // Setzt den Timeout zurück
