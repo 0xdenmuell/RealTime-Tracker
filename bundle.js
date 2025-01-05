@@ -58595,7 +58595,7 @@ async function initRecognition() {
 
 // Lade die Modelle
 async function loadModels() {
-    const modelPath = './models'; // Verzeichnis zu den Modellen
+    const modelPath = './public/assets/models/'; // Verzeichnis zu den Modellen
     await face_api_js__WEBPACK_IMPORTED_MODULE_0__.loadTinyFaceDetectorModel(modelPath);
     console.log('Models loaded');
 }
