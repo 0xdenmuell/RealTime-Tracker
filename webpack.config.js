@@ -11,7 +11,8 @@ const isProduction = process.env.NODE_ENV == 'production';
 const config = {
     entry: './src/ui.js',
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'build'),
+        publicPath: "/"
     },
     devServer: {
         host: '0.0.0.0',  // Dies stellt sicher, dass die App von außen zugänglich ist
@@ -30,15 +31,31 @@ const config = {
     module: {
         rules: [
             {
-                test: /\.(jpe?g|png|gif|svg)$/i,
-                loader: 'file-loader',
-                options: {
-                    name: '/[name].[ext]'
-                },
-            }
+                test: /\.json$/,
+                loader: 'json-loader',  // JSON-Dateien laden
+                type: 'javascript/auto',
+            },
+            {
+                test: /\.(png|jpg|jpeg|gif|svg|woff|woff2|eot|ttf|otf)$/,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: '[name].[hash].[ext]',
+                            outputPath: 'assets/',  // oder ein beliebiger Ordner
+                        },
+                    },
+                ],
+            },
         ],
     },
-
+    resolve:{
+        fallback: {
+            crypto: require.resolve("crypto-browserify"),
+            vm: require.resolve("vm-browserify"),
+            fs: false,
+        }
+    },
 };
 
 module.exports = () => {
