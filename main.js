@@ -3802,7 +3802,7 @@ eval("__webpack_require__.a(module, async (__webpack_handle_async_dependencies__
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
-eval("module.exports = __webpack_require__.p + \"assets/models/list.json\";\n\n//# sourceURL=webpack://Realtime_Tracker/./node_modules/browserify-aes/modes/list.json?");
+eval("module.exports = __webpack_require__.p + \"assets/models/list..json\";\n\n//# sourceURL=webpack://Realtime_Tracker/./node_modules/browserify-aes/modes/list.json?");
 
 /***/ }),
 
@@ -3813,7 +3813,7 @@ eval("module.exports = __webpack_require__.p + \"assets/models/list.json\";\n\n/
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
-eval("module.exports = __webpack_require__.p + \"assets/models/algorithms.json\";\n\n//# sourceURL=webpack://Realtime_Tracker/./node_modules/browserify-sign/browser/algorithms.json?");
+eval("module.exports = __webpack_require__.p + \"assets/models/algorithms..json\";\n\n//# sourceURL=webpack://Realtime_Tracker/./node_modules/browserify-sign/browser/algorithms.json?");
 
 /***/ }),
 
@@ -3824,7 +3824,7 @@ eval("module.exports = __webpack_require__.p + \"assets/models/algorithms.json\"
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
-eval("module.exports = __webpack_require__.p + \"assets/models/curves.json\";\n\n//# sourceURL=webpack://Realtime_Tracker/./node_modules/browserify-sign/browser/curves.json?");
+eval("module.exports = __webpack_require__.p + \"assets/models/curves..json\";\n\n//# sourceURL=webpack://Realtime_Tracker/./node_modules/browserify-sign/browser/curves.json?");
 
 /***/ }),
 
@@ -3835,7 +3835,7 @@ eval("module.exports = __webpack_require__.p + \"assets/models/curves.json\";\n\
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
-eval("module.exports = __webpack_require__.p + \"assets/models/primes.json\";\n\n//# sourceURL=webpack://Realtime_Tracker/./node_modules/diffie-hellman/lib/primes.json?");
+eval("module.exports = __webpack_require__.p + \"assets/models/primes..json\";\n\n//# sourceURL=webpack://Realtime_Tracker/./node_modules/diffie-hellman/lib/primes.json?");
 
 /***/ }),
 
@@ -3846,7 +3846,7 @@ eval("module.exports = __webpack_require__.p + \"assets/models/primes.json\";\n\
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
-eval("module.exports = __webpack_require__.p + \"assets/models/package.json\";\n\n//# sourceURL=webpack://Realtime_Tracker/./node_modules/elliptic/package.json?");
+eval("module.exports = __webpack_require__.p + \"assets/models/package..json\";\n\n//# sourceURL=webpack://Realtime_Tracker/./node_modules/elliptic/package.json?");
 
 /***/ }),
 
@@ -3857,7 +3857,7 @@ eval("module.exports = __webpack_require__.p + \"assets/models/package.json\";\n
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
-eval("module.exports = __webpack_require__.p + \"assets/models/aesid.json\";\n\n//# sourceURL=webpack://Realtime_Tracker/./node_modules/parse-asn1/aesid.json?");
+eval("module.exports = __webpack_require__.p + \"assets/models/aesid..json\";\n\n//# sourceURL=webpack://Realtime_Tracker/./node_modules/parse-asn1/aesid.json?");
 
 /***/ }),
 
@@ -3868,7 +3868,7 @@ eval("module.exports = __webpack_require__.p + \"assets/models/aesid.json\";\n\n
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
-eval("module.exports = __webpack_require__.p + \"public/assets/logo.98dab4971aca11bcb7ca.png\";\n\n//# sourceURL=webpack://Realtime_Tracker/./public/assets/logo.png?");
+eval("module.exports = __webpack_require__.p + \"public/assets/logo..png\";\n\n//# sourceURL=webpack://Realtime_Tracker/./public/assets/logo.png?");
 
 /***/ }),
 
