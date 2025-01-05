@@ -4,6 +4,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
 const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const isProduction = process.env.NODE_ENV == 'production';
 
@@ -11,35 +12,38 @@ const isProduction = process.env.NODE_ENV == 'production';
 const config = {
     entry: './src/ui.js',
     output: {
-        path: path.resolve(__dirname, 'build'),
-        publicPath: isProduction ? '/RealTime-Tracker/' : '/', // Dynamisch je nach Umgebung
+        path: __dirname + '/build',
+        filename: "bundle.js"
     },
 
     devServer: {
-        host: '0.0.0.0',  // Dies stellt sicher, dass die App von außen zugänglich ist
-        port: 3000,
-        hot: true,
-        open: true,
+        static: {
+            directory: path.join(__dirname, 'build')
+        }
     },
+    devtool: "source-map",
     plugins: [
         new HtmlWebpackPlugin({
             template: './src/index.html',
         }),
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'public/models'), // Quelle
+                    to: path.resolve(__dirname, 'build/public/models'),  // Ziel im Build-Ordner
+                },
+            ],
+        }),
 
-        new FaviconsWebpackPlugin(path.resolve(__dirname, 'public/assets/favicon.ico')),
+        new FaviconsWebpackPlugin(path.resolve(__dirname, './public/assets/favicon.ico')),
     ],
     module: {
         rules: [
             {
-                test: /\.json$/,
-                use: 'json-loader',
-                type: 'javascript/auto',
-            },
-            {
-                test: /\.(png|jpg|jpeg|gif|svg|woff|woff2|eot|ttf|otf)$/,
+                test: /\.(png|jpg|jpeg|gif|svg|woff|woff2|eot|ttf|otf|ico)$/,
                 type: 'asset/resource', // Nutze den asset module
                 generator: {
-                    filename: 'public/assets/[name].[hash][ext]', // Oder ein anderer Ordner
+                    filename: './public/assets/[name][ext]', // Oder ein anderer Ordner
                 },
             }
         ],

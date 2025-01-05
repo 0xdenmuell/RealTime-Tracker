@@ -9,7 +9,7 @@ export async function initRecognition() {
 
 // Lade die Modelle
 async function loadModels() {
-    const modelPath = '/models'; // Verzeichnis zu den Modellen
+    const modelPath = './public/models/'; // Verzeichnis zu den Modellen
     await faceapi.loadTinyFaceDetectorModel(modelPath);
     console.log('Models loaded');
 }

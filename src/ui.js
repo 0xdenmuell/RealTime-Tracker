@@ -30,6 +30,20 @@ const logoImage = new Image();
 logoImage.src = Logo;
 element.appendChild(logoImage);
 
+document.addEventListener('DOMContentLoaded', async () => {
+    showStatusMessage("Loading App..");
+
+    toggleCameraBtn.disabled = true;
+    toggleCameraBtn.textContent = "Loading...";
+
+    await initRecognition();
+
+    // Enable button and remove spinner after loading is done
+    toggleCameraBtn.disabled = false;
+    toggleCameraBtn.textContent = "Turn On Camera";
+
+    showStatusMessage("App ready!");
+})
 
 /**
  * Starts the work timer and begins time tracking if it is not already running.
@@ -63,6 +77,7 @@ export function stopTimer() {
     if (!isTimerOn) return;
 
     stopTracking();
+    updateDetailsList()
     clearInterval(timerInterval);
     isTimerOn = false;
 }
@@ -90,10 +105,10 @@ export function updateDetailsList() {
     });
 }
 
-toggleCameraBtn.addEventListener("click", () => {
+toggleCameraBtn.addEventListener("click", (event) => {
     if (!isCameraOn) {
         enableCamera()
-            .then(async () => {
+            .then(() => {
                 isCameraOn = true;
                 toggleCameraBtn.textContent = "Turn Off Camera";
 
@@ -109,15 +124,17 @@ toggleCameraBtn.addEventListener("click", () => {
                 isCameraOn = false;
                 toggleCameraBtn.textContent = "Turn On Camera";
 
-                stopTimer();
                 showStatusMessage("Camera stopped.");
                 stopRecognition();
             })
             .catch(err => {
-                showStatusMessage(err.message, "danger");
-            });
+                    showStatusMessage(err.message, "danger");
+                }
+            );
     }
-});
+    event.stopImmediatePropagation()
+})
+
 
 let recognitionInterval;
 
@@ -140,11 +157,13 @@ export async function startRecognition() {
         }
         setTimeout(startRecognitionLoop, recognitionInterval);
     }
-    startRecognitionLoop(); // Start the first cycle immediately
+
+    await startRecognitionLoop(); // Start the first cycle immediately
 }
 
 function stopRecognition() {
-    clearTimeout(recognitionInterval);
+    stopTimer();
+    clearTimeout(recognitionInterval)
 }
 
 
@@ -163,7 +182,7 @@ export function showStatusMessage(message, type = "info") {
 
     console.log(message);
     statusElement.textContent = message;
-    statusElement.className = `alert alert-${type}`; // Bootstrap alert type
+    statusElement.className = `alert alert-${type} text-center mx-2 my-3`; // Bootstrap alert type
     statusElement.style.display = "block";
 
     // Setzt den Timeout zurück
@@ -171,8 +190,3 @@ export function showStatusMessage(message, type = "info") {
         statusElement.style.display = "none";
     }, 10000); // Nachricht nach 10 Sekunden ausblenden
 }
-
-
-showStatusMessage("Loading App..")
-await initRecognition()
-showStatusMessage("App ready!")
