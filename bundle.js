@@ -59115,6 +59115,7 @@ function stopTimer() {
     if (!isTimerOn) return;
 
     (0,_timeTracker__WEBPACK_IMPORTED_MODULE_1__.stopTracking)();
+    updateDetailsList()
     clearInterval(timerInterval);
     isTimerOn = false;
 }
