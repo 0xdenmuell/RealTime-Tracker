@@ -3973,7 +3973,7 @@ eval("/* (ignored) */\n\n//# sourceURL=webpack://Realtime_Tracker/fs_(ignored)?"
 /******/ 	
 /******/ 	/* webpack/runtime/publicPath */
 /******/ 	(() => {
-/******/ 		__webpack_require__.p = "/";
+/******/ 		__webpack_require__.p = "/RealTime-Tracker/public/";
 /******/ 	})();
 /******/ 	
 /************************************************************************/
