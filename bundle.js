@@ -58839,6 +58839,7 @@ async function startRecognition() {
         }
         setTimeout(startRecognitionLoop, recognitionInterval);
     }
+
     startRecognitionLoop(); // Start the first cycle immediately
 }
 
@@ -58862,7 +58863,7 @@ function showStatusMessage(message, type = "info") {
 
     console.log(message);
     statusElement.textContent = message;
-    statusElement.className = `alert alert-${type}`; // Bootstrap alert type
+    statusElement.className = `alert alert-${type} text-center`; // Bootstrap alert type
     statusElement.style.display = "block";
 
     // Setzt den Timeout zurück
@@ -58873,7 +58874,13 @@ function showStatusMessage(message, type = "info") {
 
 
 showStatusMessage("Loading App..")
+toggleCameraBtn.disabled = true;
+toggleCameraBtn.classList.add('loading');
+toggleCameraBtn.textContent = "Loading...";
 await (0,_faceRecognition__WEBPACK_IMPORTED_MODULE_3__.initRecognition)()
+toggleCameraBtn.disabled = false;
+toggleCameraBtn.classList.remove('loading')
+toggleCameraBtn.textContent = "Turn on Camera";
 showStatusMessage("App ready!")
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } }, 1);
