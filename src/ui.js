@@ -5,7 +5,7 @@ import {disableCamera, enableCamera} from "./camera";
 import {startTracking, stopTracking, getTimeIntervals, exportTimeIntervalsAsCSV} from "./timeTracker";
 
 // Import the logo image file
-import Logo from './logo.png';
+import Logo from '../public/assets/logo.png';
 import {initRecognition, isFaceDetected} from "./faceRecognition";
 
 

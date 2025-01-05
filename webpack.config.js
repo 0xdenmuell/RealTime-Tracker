@@ -12,8 +12,9 @@ const config = {
     entry: './src/ui.js',
     output: {
         path: path.resolve(__dirname, 'build'),
-        publicPath: "/"
+        publicPath: isProduction ? '/RealTime-Tracker/' : '/', // Dynamisch je nach Umgebung
     },
+
     devServer: {
         host: '0.0.0.0',  // Dies stellt sicher, dass die App von außen zugänglich ist
         port: 3000,
@@ -25,28 +26,21 @@ const config = {
             template: './src/index.html',
         }),
 
-        //todo fix favicon with docker
-        //new FaviconsWebpackPlugin('./src/favicon.ico'),
+        new FaviconsWebpackPlugin(path.resolve(__dirname, 'public/assets/favicon.ico')),
     ],
     module: {
         rules: [
             {
                 test: /\.json$/,
-                loader: 'json-loader',  // JSON-Dateien laden
                 type: 'javascript/auto',
             },
             {
                 test: /\.(png|jpg|jpeg|gif|svg|woff|woff2|eot|ttf|otf)$/,
-                use: [
-                    {
-                        loader: 'file-loader',
-                        options: {
-                            name: '[name].[hash].[ext]',
-                            outputPath: 'assets/',  // oder ein beliebiger Ordner
-                        },
-                    },
-                ],
-            },
+                type: 'asset/resource', // Nutze den asset module
+                generator: {
+                    filename: 'public/assets/[name].[hash][ext]', // Oder ein anderer Ordner
+                },
+            }
         ],
     },
     resolve:{
