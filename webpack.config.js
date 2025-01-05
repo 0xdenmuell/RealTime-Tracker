@@ -25,7 +25,7 @@ const config = {
         }),
 
         //todo fix favicon with docker
-       //new FaviconsWebpackPlugin('./src/favicon.ico'),
+        //new FaviconsWebpackPlugin('./src/favicon.ico'),
     ],
     module: {
         rules: [
@@ -38,15 +38,13 @@ const config = {
             }
         ],
     },
+
 };
 
 module.exports = () => {
     if (isProduction) {
         config.mode = 'production';
-
-
         config.plugins.push(new WorkboxWebpackPlugin.GenerateSW());
-
     } else {
         config.mode = 'development';
     }

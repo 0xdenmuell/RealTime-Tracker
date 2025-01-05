@@ -6,7 +6,8 @@ import {startTracking, stopTracking, getTimeIntervals, exportTimeIntervalsAsCSV}
 
 // Import the logo image file
 import Logo from './logo.png';
-import {handleUserRecognition} from "./faceRecognition";
+import {initRecognition, isFaceDetected} from "./faceRecognition";
+
 
 // Select DOM elements for UI interaction
 const detailsList = document.getElementById("detailsList");
@@ -22,14 +23,13 @@ let isTimerOn = false;
 
 let workedTime = 0; // Timer counter in seconds
 let timerInterval; // Reference to the timer interval
-let recognitionInterval;
-
 
 // Webpack-specific handling to display a logo in the UI
 const element = document.createElement('div');
 const logoImage = new Image();
 logoImage.src = Logo;
 element.appendChild(logoImage);
+
 
 /**
  * Starts the work timer and begins time tracking if it is not already running.
@@ -90,16 +90,15 @@ export function updateDetailsList() {
     });
 }
 
-
 toggleCameraBtn.addEventListener("click", () => {
     if (!isCameraOn) {
         enableCamera()
-            .then(() => {
+            .then(async () => {
                 isCameraOn = true;
                 toggleCameraBtn.textContent = "Turn Off Camera";
 
                 showStatusMessage("Camera started. Recognition ongoing...");
-                startRecognitionLoop();
+                startRecognition();
             })
             .catch(err => {
                 showStatusMessage(err.message, "danger");
@@ -112,6 +111,7 @@ toggleCameraBtn.addEventListener("click", () => {
 
                 stopTimer();
                 showStatusMessage("Camera stopped.");
+                stopRecognition();
             })
             .catch(err => {
                 showStatusMessage(err.message, "danger");
@@ -119,30 +119,32 @@ toggleCameraBtn.addEventListener("click", () => {
     }
 });
 
+let recognitionInterval;
 
-function startRecognitionLoop() {
-
-    async function recognitionCycle() {
+export async function startRecognition() {
+    async function startRecognitionLoop() {
         if (!isCameraOn) return
-        try {
-            await handleUserRecognition().then(() => {
-                if (!isTimerOn)
-                    showStatusMessage("Face detected! Timer started.", "success");  // Using a 'success' alert type
 
-                startTimer();
-                recognitionInterval = 5000
-            })
-        } catch (err) {
+        if (await isFaceDetected()) {
+            if (!isTimerOn)
+                showStatusMessage("Face detected! Timer started.", "success");  // Using a 'success' alert type
+
+            startTimer();
+            recognitionInterval = 5000
+        } else {
             stopTimer();
-            if (isCameraOn) showStatusMessage(err.message, "warning");
+            if (isCameraOn) showStatusMessage("No face detected. Timer stopped.", "warning");
+
             updateDetailsList();
             recognitionInterval = 2000
-        } finally {
-            setTimeout(recognitionCycle, recognitionInterval);
-
         }
+        setTimeout(startRecognitionLoop, recognitionInterval);
     }
-    recognitionCycle(); // Start the first cycle immediately
+    startRecognitionLoop(); // Start the first cycle immediately
+}
+
+function stopRecognition() {
+    clearTimeout(recognitionInterval);
 }
 
 
@@ -169,3 +171,8 @@ export function showStatusMessage(message, type = "info") {
         statusElement.style.display = "none";
     }, 10000); // Nachricht nach 10 Sekunden ausblenden
 }
+
+
+showStatusMessage("Loading App..")
+await initRecognition()
+showStatusMessage("App ready!")

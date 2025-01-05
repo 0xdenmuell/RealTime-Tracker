@@ -11,23 +11,12 @@ services:
       - .:/app  # Verzeichnis in den Container einbinden, falls du lokale Änderungen hast
     environment:
       - NODE_ENV=production  # Falls notwendig, für die richtige Konfiguration
-    depends_on:
-      - compreface  # Stelle sicher, dass Compreface läuft, bevor die Realtime-App startet
-    networks:
-      - mot-network  # Gemeinsames Netzwerk für alle Container
 
   # Service für Compreface
   compreface:
     image: exadel/compreface:latest  # Nutze das offizielle Compreface Docker-Image
     container_name: compreface
     ports:
-      - "8001:8000"  # Externer Port 8001 auf den Container-Port 8000 weiterleiten
+      - "8000:8000"  # Externer Port 8001 auf den Container-Port 8000 weiterleiten
     volumes:
       - ./data:/compreface/data  # Speichere Daten persistent auf dem Host
-    networks:
-      - mot-network  # Gemeinsames Netzwerk für alle Container
-
-# Netzwerkkonfiguration
-networks:
-  mot-network:
-    driver: bridge
