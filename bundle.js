@@ -58649,29 +58649,63 @@ function getTimeIntervals() {
     return timeIntervals;
 }
 
-// Export intervals as CSV
+/**
+ * Exports the tracked time intervals as a CSV file compatible with Toggl Track.
+ * Toggl CSV requires specific headers: User, Email, Client, Project, Task, Description, Billable, Start date, Start time, Duration, Tags.
+ */
 function exportTimeIntervalsAsCSV() {
-    if (timeIntervals.length === 0) {
-        alert("No time intervals to export!");
+    const intervals = getTimeIntervals();
+    if (intervals.length === 0) {
+        alert("No time intervals to export.");
         return;
     }
 
-    const csvContent = "data:text/csv;charset=utf-8," +
-        "Start Time,End Time,Duration (seconds)\n" +
-        timeIntervals.map(interval => {
-            const duration = Math.round((interval.end - interval.start) / 1000); // Calculate duration in seconds
-            return `${interval.start.toISOString()},${interval.end.toISOString()},${duration}`;
-        }).join("\n");
+    // Define CSV headers for Toggl import
+    const headers = ["User", "Email", "Client", "Project", "Task", "Description", "Billable", "Start date", "Start time", "Duration", "Tags"];
 
-    const encodedUri = encodeURI(csvContent);
+    // Create CSV content
+    const csvContent = [headers.join(",")]; // Join headers with commas
+
+    intervals.forEach((interval) => {
+        const start = interval.start;
+        const end = interval.end;
+        const durationInSeconds = Math.round((end - start) / 1000);
+
+        const startDate = start.toLocaleDateString('en-CA'); // Format: YYYY-MM-DD
+        const startTime = start.toLocaleTimeString('en-GB'); // Format: HH:MM:SS
+        const hours = Math.floor(durationInSeconds / 3600);
+        const minutes = Math.floor((durationInSeconds % 3600) / 60);
+        const seconds = durationInSeconds % 60;
+        const durationFormatted = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`; // Format: HH:MM:SS
+
+        // Example entry: adjust project, description, etc., as per your need
+        const row = [
+            "User Name",              // Replace with real user name if available
+            "user@example.com",       // Replace with real email if available
+            "Client Name",            // Optional
+            "RealTime Tracker",       // Example project name
+            "",                       // Task (if available)
+            "Face Recognition Work",  // Example description
+            "true",                   // Billable (set "true" or "false" as needed)
+            startDate,
+            startTime,
+            durationFormatted,
+            "work,tracking"           // Example tags
+        ];
+
+        csvContent.push(row.map(value => `"${value}"`).join(",")); // Quote each field to escape commas
+    });
+
+    // Create a Blob and download link
+    const csvBlob = new Blob([csvContent.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(csvBlob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "time_intervals.csv");
-    document.body.appendChild(link);
-
+    link.href = url;
+    link.download = "toggl_import.csv";
     link.click();
-    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 }
+
 
 
 /***/ }),
