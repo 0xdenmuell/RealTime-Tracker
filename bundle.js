@@ -59208,8 +59208,9 @@ function stopRecognition() {
 /**
  * Triggers the export of time interval data as a CSV file when the export button is clicked.
  */
-exportDetailsBtn.addEventListener("click", () => {
+exportDetailsBtn.addEventListener("click", (event) => {
     (0,_timeTracker__WEBPACK_IMPORTED_MODULE_1__.exportTimeIntervalsAsCSV)();
+    event.stopImmediatePropagation()
 });
 
 let statusMessageTimeout;
