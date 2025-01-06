@@ -59215,7 +59215,6 @@ exportDetailsBtn.addEventListener("click", () => {
 let statusMessageTimeout;
 
 function showStatusMessage(message, type = "info") {
-    // Verhindert, dass mehrere Nachrichten gleichzeitig angezeigt werden
     clearTimeout(statusMessageTimeout);
 
     console.log(message);
