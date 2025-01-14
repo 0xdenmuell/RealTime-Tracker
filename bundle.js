@@ -58512,19 +58512,24 @@ const video = document.getElementById("live");
 const canvasDisplay = document.getElementById("canvasDisplay");
 let animationFrameId;
 
+/**
+ * Enables the camera, streams the video feed, and renders the frames on the canvas.
+ * @returns {Promise<void>} Resolves once the camera is enabled and video starts playing.
+ * @throws {Error} If the camera cannot be accessed or an error occurs during setup.
+ */
 async function enableCamera() {
     try {
-        // Request access to the camera
+        // Request access to the user's camera
         video.srcObject = await navigator.mediaDevices.getUserMedia({video: true});
 
-        // Start the video stream once it is available
+        // Wait until the video metadata (e.g., resolution) is loaded
         await new Promise((resolve) => {
             video.onloadedmetadata = () => {
-                // Adjust the canvas size to match the video resolution
+                // Adjust the canvas size to match the video feed resolution
                 canvasDisplay.width = video.videoWidth;
                 canvasDisplay.height = video.videoHeight;
 
-                // Start the video
+                // Start playing the video feed
                 video.play();
                 resolve();
             };
@@ -58532,39 +58537,44 @@ async function enableCamera() {
 
         const ctx = canvasDisplay.getContext("2d");
 
-        // Function to continuously draw the video frame on the canvas
+        // Function to draw the video frames continuously on the canvas
         const drawCameraFrame = () => {
-            ctx.drawImage(video, 0, 0, canvasDisplay.width, canvasDisplay.height);
-            animationFrameId = requestAnimationFrame(drawCameraFrame);
+            ctx.drawImage(video, 0, 0, canvasDisplay.width, canvasDisplay.height); // Draw current frame
+            animationFrameId = requestAnimationFrame(drawCameraFrame); // Request the next animation frame
         };
 
-        // Start rendering the video frames
+        // Begin rendering the video frames onto the canvas
         drawCameraFrame();
     } catch (err) {
-        throw new Error("Camera error:" + err.message);
+        throw new Error("Camera error: " + err.message);
     }
 }
 
+/**
+ * Disables the camera by stopping the video stream and clearing the canvas.
+ * @returns {Promise<void>} Resolves once the camera is disabled and the canvas is cleared.
+ * @throws {Error} If there is an error stopping the camera or clearing the canvas.
+ */
 async function disableCamera() {
     try {
         // Stop the camera stream
         const stream = video.srcObject;
         if (stream) {
             const tracks = stream.getTracks();
-            tracks.forEach(track => track.stop());
+            tracks.forEach(track => track.stop()); // Stop all media tracks
         }
         video.srcObject = null;
 
         // Clear the canvas
         const ctx = canvasDisplay.getContext("2d");
-        ctx.clearRect(0, 0, canvasDisplay.width, canvasDisplay.height);
+        ctx.clearRect(0, 0, canvasDisplay.width, canvasDisplay.height); // Clear the canvas area
 
-        // Stop the animation
+        // Stop the animation frame loop
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
         }
     } catch (err) {
-        throw new Error("Error disabling the camera:" + err.message);
+        throw new Error("Error disabling the camera: " + err.message);
     }
 }
 
@@ -58588,27 +58598,33 @@ __webpack_require__.r(__webpack_exports__);
 
 const canvasDisplay = document.getElementById("canvasDisplay");
 
+/**
+ * Initializes face recognition by loading models and conducting an initial detection.
+ * Ensures the required face-api.js models are available for use.
+ */
 async function initRecognition() {
-    await loadModels();
-    await face_api_js__WEBPACK_IMPORTED_MODULE_0__.detectSingleFace(canvasDisplay, new face_api_js__WEBPACK_IMPORTED_MODULE_0__.TinyFaceDetectorOptions())
+    await loadModels(); // Load the face detection models
+    await face_api_js__WEBPACK_IMPORTED_MODULE_0__.detectSingleFace(canvasDisplay, new face_api_js__WEBPACK_IMPORTED_MODULE_0__.TinyFaceDetectorOptions()); // Initial test detection
 }
 
-// Lade die Modelle
+/**
+ * Loads the necessary models for face detection using face-api.js.
+ */
 async function loadModels() {
-    const modelPath = './public/models/'; // Verzeichnis zu den Modellen
-    await face_api_js__WEBPACK_IMPORTED_MODULE_0__.loadTinyFaceDetectorModel(modelPath);
-    console.log('Models loaded');
+    const modelPath = './public/models/'; // Path to the face detection models
+    await face_api_js__WEBPACK_IMPORTED_MODULE_0__.loadTinyFaceDetectorModel(modelPath); // Load the Tiny Face Detector model
+    console.log('Models loaded'); // Log success
 }
 
+/**
+ * Checks if a face is detected in the video feed.
+ * @returns {boolean} `true` if a face is detected, `false` otherwise.
+ */
 async function isFaceDetected() {
-    // Erkennung durchführen
     const detections =
-        await face_api_js__WEBPACK_IMPORTED_MODULE_0__.detectAllFaces(canvasDisplay, new face_api_js__WEBPACK_IMPORTED_MODULE_0__.TinyFaceDetectorOptions())
-
-    return detections.length > 0;
+        await face_api_js__WEBPACK_IMPORTED_MODULE_0__.detectAllFaces(canvasDisplay, new face_api_js__WEBPACK_IMPORTED_MODULE_0__.TinyFaceDetectorOptions()); // Detect all faces
+    return detections.length > 0; // Return true if at least one face is detected
 }
-
-
 
 
 /***/ }),
@@ -58705,7 +58721,6 @@ function exportTimeIntervalsAsCSV() {
     link.click();
     URL.revokeObjectURL(url);
 }
-
 
 
 /***/ }),
@@ -59080,7 +59095,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
 // Select DOM elements for UI interaction
 const detailsList = document.getElementById("detailsList");
 const workedTimeDisplay = document.getElementById("workedTime");
@@ -59262,6 +59276,7 @@ function showStatusMessage(message, type = "info") {
         statusElement.style.display = "none";
     }, 10000); // Nachricht nach 10 Sekunden ausblenden
 }
+
 })();
 
 /******/ })()
